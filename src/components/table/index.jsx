@@ -7,7 +7,7 @@ export const EmployeeTable = () => {
 
     return (
         <div className='min-w-full flex justify-center'>
-            <table className=" bg-white">
+            <table className="bg-white rounded-lg shadow-2xl">
                 <thead>
                     <tr>
                         <th className="py-3 px-6 font-bold uppercase bg-gray-100 text-gray-600 border-b border-gray-200">
@@ -29,7 +29,7 @@ export const EmployeeTable = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {state.error ? (
+                    {state.loading || state.postError ? (
                         <tr>
                             <td colSpan={6} className="bg-gray-200 text-center h-60 font-bold">Ups! Ocurrio un error!</td>
                         </tr>

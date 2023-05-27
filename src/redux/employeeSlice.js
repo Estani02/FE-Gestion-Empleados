@@ -36,41 +36,46 @@ export const updateEmployee = createAsyncThunk(
     }
 );
 
-export const createEmployee = async ({ employeeData }) => {
-    try {
-        // Realizar el primer POST para crear el empleado
-        const response = await axios.post(`${api}/employees/${employeeData.id}`, { name: employeeData.name, position_id: employeeData.idPosition });
-        const createEmployee = response.data;
+export const createEmployee = createAsyncThunk(
+    'employeeSlice/createEmployee',
+    async (employeeData) => {
+        try {
+            // Realizar el primer POST para crear el empleado
+            const response = await axios.post(`${api}/employees`, { name: employeeData.name, position_id: employeeData.position_id });
+            const createEmployee = response.data;
 
-        // Obtener el ID del empleado recién creado
-        const employeeId = createEmployee.id;
+            const employeeId = createEmployee.id;
 
-        // Realizar el segundo POST para asignar el curso al empleado
-        const cursoData = {
-            employee_id: employeeId,
-            // Otros datos del curso...
-        };
+            const historieData = {
+                employee_id: employeeId,
+                start_date: employeeData.start_date,
+                end_date: employeeData.end_date,
+                company: employeeData.company
+            };
 
-        const responseCurso = await axios.post('URL_DEL_ENDPOINT_PARA_ASIGNAR_CURSO', cursoData);
-        const cursoAsignado = responseCurso.data;
+            await axios.post(`${api}/employment_histories`, historieData);
 
-        // Otros POSTs que dependan de la creación del empleado o asignación de curso...
+            const trainingData = {
+                employee_id: employeeId,
+                name: employeeData.training
+            }
 
-        // Retornar los datos necesarios
-        return {
-            empleado: createEmployee,
-            curso: cursoAsignado,
-        };
-    } catch (error) {
-        // Manejar errores
-        throw new Error('Error al crear el empleado y asignar el curso.');
+            await axios.post(`${api}/trainings`, trainingData);
+
+            const res = await axios.get(`${api}/employees`);
+            return res.data;
+        } catch (error) {
+            // Manejar errores
+            throw new Error('Error al crear el empleado y asignar el curso.');
+        }
     }
-};
+);
 
 const initialState = {
     data: [],
     loading: false,
     error: null,
+    postError: null
 }
 
 const employeeSlice = createSlice({
@@ -127,8 +132,21 @@ const employeeSlice = createSlice({
             .addCase(updateEmployee.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
-            });
+            })
 
+            // POST
+            .addCase(createEmployee.pending, (state) => {
+                state.loading = true;
+                state.postError = null;
+            })
+            .addCase(createEmployee.fulfilled, (state, action) => {
+                state.loading = false;
+                state.data = action.payload;
+            })
+            .addCase(createEmployee.rejected, (state, action) => {
+                state.loading = false;
+                state.postError = action.error.message;
+            });
     },
 });
 

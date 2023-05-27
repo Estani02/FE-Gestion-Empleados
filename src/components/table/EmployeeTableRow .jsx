@@ -129,10 +129,10 @@ const EmployeeTableRow = ({ employee }) => {
             <td className="py-4 px-6 border-b border-gray-200 border-r">{employee?.position.department}</td>
             <td className="py-4 px-6 border-b border-gray-200 border-r">{employee?.position.name}</td>
             <td className="py-4 px-8 border-b border-gray-200 border-r">
-                <div className=' flex items-center justify-between'>
+                <div className='flex flex-col md:flex-row items-center justify-between'>
                     {employee?.employment_history.company}
-                    <button className='ml-5' onClick={handleOpenInfo}>
-                        <img src={info} alt="info" className='h-[20px]' />
+                    <button className='ml-5 h-[20px]' onClick={handleOpenInfo}>
+                        <img src={info} alt="info" className='max-w-full max-h-full' />
                     </button>
                 </div>
             </td>
