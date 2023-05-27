@@ -20,11 +20,13 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="flex justify-center items-center flex-col gap-40">
-      <h1 className="text-3xl font-bold underline">
-        Gestion de Empleados
-      </h1>
-      <EmployeeTable />
+    <div className="flex justify-center items-center flex-col">
+      <div className="flex justify-center items-center flex-col mb-10">
+        <h1 className="text-3xl font-bold underline mt-20 mb-[5rem]">
+          Gestion de Empleados
+        </h1>
+        <EmployeeTable />
+      </div>
       <FormEmployee />
     </div>
   )
