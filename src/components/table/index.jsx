@@ -31,7 +31,7 @@ export const EmployeeTable = () => {
                 <tbody>
                     {state.loading || state.postError ? (
                         <tr>
-                            <td colSpan={6} className="bg-gray-200 text-center h-60 font-bold">Cargando lista de emoleados...</td>
+                            <td colSpan={6} className="bg-gray-200 text-center h-60 font-bold">Cargando lista de empleados...</td>
                         </tr>
                     ) : state.data.length === 0 ? (
                         <tr>
