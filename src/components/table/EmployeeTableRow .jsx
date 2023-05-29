@@ -14,36 +14,35 @@ const EmployeeTableRow = ({ employee }) => {
     const department = useSelector(state => state.departments.data)
     const position = useSelector(state => state.position.data)
 
-    const [openD, setOpenD] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [openInfo, setOpenInfo] = useState(false);
+    const initialOpen = {
+        openEdit: false,
+        openDelete: false,
+        openInfo: false
+    }
+
+    const [open, setOpen] = useState(initialOpen)
+
     const [id, setId] = useState('');
     const [idPosition, setIdPosition] = useState('')
     const [firstSelectorValue, setFirstSelectorValue] = useState('');
     const [secondSelectorEnabled, setSecondSelectorEnabled] = useState(false);
 
-    const handleCloseD = () => setOpenD(false);
-    const handleClose = () => setOpen(false);
-    const handleCloseInfo = () => setOpenInfo(false);
+    function handleOpen(id, nameButtom) {
 
-    function handleOpenD(idR) {
-        setOpenD(true);
-        setId(idR);
+        setOpen({
+            ...open,
+            [nameButtom]: true
+        });
+        setId(id)
     }
 
-    function handleOpen(idR) {
-        setOpen(true);
-        setId(idR);
-    }
-
-    function handleOpenInfo(idR) {
-        setOpenInfo(true);
-        setId(idR);
+    function handleClose() {
+        setOpen(initialOpen)
     }
 
     function handleDelateRequest() {
         dispatch(deleteEmployee(id));
-        setOpenD(false);
+        handleClose()
     }
 
     function handleChangeDepartament(s) {
@@ -62,13 +61,13 @@ const EmployeeTableRow = ({ employee }) => {
 
     function handlePutRequest() {
         dispatch(updateEmployee({ id, idPosition }))
-        setOpen(false)
+        handleClose()
     }
 
     return (
         <tr>
             <Modal
-                open={open}
+                open={open.openEdit}
                 onClose={handleClose}
             >
                 <div className='bg-white absolute w-[25rem] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-8 bg-whiter rounded-[0.5rem] flex items-center justify-center flex-col gap-5'>
@@ -96,8 +95,8 @@ const EmployeeTableRow = ({ employee }) => {
                 </div>
             </Modal>
             <Modal
-                open={openD}
-                onClose={handleCloseD}
+                open={open.openDelete}
+                onClose={handleClose}
             >
                 <div className='absolute bg-white w-[32rem] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-8 bg-whiter rounded-[0.5rem] flex items-center justify-center'>
                     <div className='flex flex-col'>
@@ -107,14 +106,14 @@ const EmployeeTableRow = ({ employee }) => {
                         </div>
                         <div className='flex flex-row gap-4 w-full justify-center items-center'>
                             <Button style={{ background: '#ffc4cd', color: '#e00b2b' }} onClick={handleDelateRequest} variant='contained'>Si</Button>
-                            <Button onClick={handleCloseD} variant='contained'>Cancelar</Button>
+                            <Button onClick={handleClose} variant='contained'>Cancelar</Button>
                         </div>
                     </div>
                 </div>
             </Modal>
             <Modal
-                open={openInfo}
-                onClose={handleCloseInfo}
+                open={open.openInfo}
+                onClose={handleClose}
             >
                 <div className='absolute bg-white w-[32rem] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-8 bg-whiter rounded-[0.5rem] flex flex-col'>
                     <h4 className='w-full text-center mb-5 text-2xl font-bold'>Experiencia de {employee.name}</h4>
@@ -131,7 +130,7 @@ const EmployeeTableRow = ({ employee }) => {
             <td className="py-4 px-8 border-b border-gray-200 border-r">
                 <div className='flex flex-col md:flex-row items-center justify-between'>
                     {employee?.employment_history.company}
-                    <button className='ml-5 h-[20px]' onClick={handleOpenInfo}>
+                    <button className='ml-5 h-[20px]' onClick={() => handleOpen(undefined, 'openInfo')} >
                         <img src={info} alt="info" className='max-w-full max-h-full' />
                     </button>
                 </div>
@@ -139,10 +138,10 @@ const EmployeeTableRow = ({ employee }) => {
             <td className="py-4 px-6 border-b border-gray-200 border-r">{employee?.trainings.name}</td>
             <td className="py-4 px-6 border-b border-gray-200">
                 <div className='flex gap-3'>
-                    <button onClick={() => handleOpen(employee.id)} className='bg-[#BDF5D3] w-8 px-1 py-1 rounded-md'>
+                    <button onClick={() => handleOpen(employee.id, 'openEdit')} className='bg-[#BDF5D3] w-8 px-1 py-1 rounded-md'>
                         <img src={pencil} alt='Lapiz' />
                     </button>
-                    <button onClick={() => handleOpenD(employee.id)} className='bg-[#ffc4cd] w-8 px-1 py-1 rounded-md'>
+                    <button onClick={() => handleOpen(employee.id, 'openDelete')} className='bg-[#ffc4cd] w-8 px-1 py-1 rounded-md'>
                         <img src={trash} alt='Tacho de basura' />
                     </button>
                 </div>
