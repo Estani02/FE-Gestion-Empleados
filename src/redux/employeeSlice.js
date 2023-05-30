@@ -3,9 +3,15 @@ import axios from 'axios';
 
 const api = 'http://localhost:3000/api/v1'
 
+function removeAccents(str) {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 export const getEmployee = createAsyncThunk('todos/getEmployee', async () => {
     const response = await axios.get(`${api}/employees`);
-    return response.data;
+
+    const sortedData = response.data.sort((a, b) => a.id - b.id);
+    return sortedData;
 });
 
 export const deleteEmployee = createAsyncThunk(
@@ -71,17 +77,52 @@ export const createEmployee = createAsyncThunk(
     }
 );
 
+export const filterEmployee = createAsyncThunk(
+    'employeeSlice/searchTerm',
+    async (_, { dispatch, getState }) => {
+        const searchInput = getState()
+        const searchTermWithoutAccents = removeAccents(searchInput);
+
+        const employee = getState().employee.data
+        if (searchTermWithoutAccents.trim().length <= 1) {
+            dispatch(getEmployee())
+        } else {
+            const employeeFilter = employee.filter((employee) => {
+                const employeeNameWithoutAccents = removeAccents(employee.name.toLowerCase());
+                return employeeNameWithoutAccents.includes(searchInput);
+            })
+            dispatch(setDataRequest(employeeFilter))
+        }
+    }
+)
+
 const initialState = {
     data: [],
+    temporal: [],
     loading: false,
     error: null,
-    postError: null
+    postError: null,
+    searchTerm: ''
 }
 
 const employeeSlice = createSlice({
     name: 'employee',
     initialState,
     reducers: {
+        setSearchTerm: (state, action) => {
+            const searchTerm = action.payload.toLowerCase().trim();
+            const searchTermWithoutAccents = removeAccents(searchTerm);
+
+            if (searchTermWithoutAccents.length === 1) {
+                state.temporal = state.data;
+            } else {
+                state.searchTerm = searchTerm;
+                state.temporal = state.data.filter((employee) => {
+                    const employeeNameWithoutAccents = removeAccents(employee.name.toLowerCase());
+                    return employeeNameWithoutAccents.includes(searchTermWithoutAccents);
+                });
+            }
+        },
         setDataRequest: (state, action) => {
             state.data = action.payload;
         }
@@ -96,6 +137,7 @@ const employeeSlice = createSlice({
             .addCase(getEmployee.fulfilled, (state, action) => {
                 state.loading = false;
                 state.data = action.payload;
+                state.temporal = action.payload;
             })
             .addCase(getEmployee.rejected, (state, action) => {
                 state.loading = false;
@@ -110,6 +152,7 @@ const employeeSlice = createSlice({
                 state.status = 'succeeded';
                 const deletedEmployeeId = action.payload.data.id;
                 state.data = state.data.filter((employee) => employee.id !== deletedEmployeeId);
+                state.temporal = action.payload;
             })
             .addCase(deleteEmployee.rejected, (state, action) => {
                 state.status = 'failed';
@@ -125,7 +168,7 @@ const employeeSlice = createSlice({
                 state.loading = false;
                 // Actualiza el empleado en el estado local
                 const updatedEmployee = action.payload;
-                state.data = state.data.map((employee) =>
+                state.temporal = state.temporal.map((employee) =>
                     employee.id === updatedEmployee.id ? updatedEmployee : employee
                 );
             })
@@ -142,14 +185,30 @@ const employeeSlice = createSlice({
             .addCase(createEmployee.fulfilled, (state, action) => {
                 state.loading = false;
                 state.data = action.payload;
+                state.temporal = action.payload;
             })
             .addCase(createEmployee.rejected, (state, action) => {
+                state.loading = false;
+                state.postError = action.error.message;
+            })
+
+            // SEARCH
+            .addCase(filterEmployee.pending, (state) => {
+                state.loading = true;
+                state.postError = null;
+            })
+            .addCase(filterEmployee.fulfilled, (state, action) => {
+                state.loading = false;
+                state.data = action.payload;
+                state.temporal = action.payload
+            })
+            .addCase(filterEmployee.rejected, (state, action) => {
                 state.loading = false;
                 state.postError = action.error.message;
             });
     },
 });
 
-export const { setDataRequest } = employeeSlice.actions;
+export const { setDataRequest, setSearchTerm } = employeeSlice.actions;
 export const { actions } = employeeSlice;
 export default employeeSlice.reducer;

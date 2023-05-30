@@ -9,6 +9,6 @@ export const store = configureStore({
         employee: employeeSlice,
         departments: departmentsSlice,
         position: positionSlice,
-        trainings: trainingSlice
+        trainings: trainingSlice,
     }
 })
