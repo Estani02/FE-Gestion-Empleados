@@ -4,7 +4,7 @@ import { getEmployee } from './redux/employeeSlice';
 import { useEffect } from "react";
 import { getDepatament } from "./redux/departmentsSlice";
 import { getPosition } from "./redux/positionSlice";
-import { FormEmployee } from "./components/creation_form";
+import { FormEmployee } from "./components/form_employee";
 import { getTrainings } from "./redux/trainingSlice";
 
 
